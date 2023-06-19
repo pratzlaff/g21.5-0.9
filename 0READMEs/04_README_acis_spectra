@@ -1,0 +1,57 @@
+#! /bin/bash
+#
+# create spectra
+#
+
+. src/functions.bash
+
+. ~/.bash_aliases
+shopt -s expand_aliases
+
+ciao
+
+for obsid in $(obsids)
+do
+    instrument $obsid | grep -qi acis || continue
+
+    ddir=data/$obsid/tg_reprocess # "data" directory
+    pdir=data/$obsid/primary
+    sdir=data/$obsid/secondary
+
+    evt2=`ls $ddir/*evt2.fits`
+    asol=`ls $pdir/*asol1.fits*`
+    bpix=`ls $pdir/*bpix1.fits*`
+    mask=`ls $sdir/*msk1.fits*`
+    pbk=`ls $sdir/*pbk0.fits*`
+
+    rm -rf spectra/${obsid}*
+    
+    #
+    # use same options as Jenny, from
+    # /data/hrc/Chandra_Cross_Cal/G21.5-0.9/ACIS-S/scripts/specextract.pl
+    #
+    for type in plerion halo
+    do
+        punlearn specextract
+        specextract \
+	    infile="${evt2}[sky=region(region/${type}.reg)]" \
+	    outroot=spectra/${obsid}_${type} \
+	    bkgfile="${evt2}[sky=region(region/${obsid}_bg.reg)]" \
+	    weight_rmf=yes \
+	    asp=$asol \
+	    mskfile=$mask \
+	    badpixfile=$bpix \
+	    grouptype=NUM_CTS binspec=20 \
+	    bkgresp=no \
+	    clobber=yes
+	    grouptype=NONE binspec=NONE \
+
+        punlearn dmhedit
+        for f in ${obsid}_${type}.pi ${obsid}_${type}_grp.pi
+        do
+	    dmhedit spectra/$f none add BACKFILE "'$(pwd)/spectra/${obsid}_${type}_bkg.pi'" datatype=string
+	    dmhedit spectra/$f none add ANCRFILE "'$(pwd)/spectra/${obsid}_${type}.arf'" datatype=string
+	    dmhedit spectra/$f none add RESPFILE "'$(pwd)/spectra/${obsid}_${type}.rmf'" datatype=string
+        done
+    done
+done

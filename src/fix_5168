@@ -1,0 +1,26 @@
+. /usr/local/ciao/bin/ciao.sh
+
+dir=./data/5168
+
+cp $dir/tg_reprocess/hrcf*_flt1_evt1a.fits $dir/tg_reprocess/hrcf05168N004_evt2.fits
+
+punlearn hrc_dtfstats
+
+hrc_dtfstats infile=$dir/primary/hrcf05168_001N003_dtf1.fits.gz outfile=$dir/tg_reprocess/hrcf05168_001N004_dtfstats.fits gtifile=$dir/tg_reprocess/hrcf05168N004_evt2.fits'[gti]' 'clobber=yes'
+
+dtcor=$(dmlist $dir/tg_reprocess/hrcf05168_001N004_dtfstats.fits data,raw | tail -1 | perl -anle 'print $F[0]')
+ontime=$(dmkeypar $dir/tg_reprocess/hrcf05168N004_evt2.fits ontime echo+)
+livetime=$(echo "$dtcor * $ontime" | bc)
+
+punlearn 'dmhedit'
+
+dmhedit $dir'/tg_reprocess/hrcf05168N004_evt2.fits' 'filelist=' 'op=add' 'key=LIVETIME' value=$livetime
+
+punlearn 'dmhedit'
+
+dmhedit $dir'/tg_reprocess/hrcf05168N004_evt2.fits' 'filelist=' 'op=add' 'key=EXPOSURE' value=$livetime
+
+punlearn 'dmhedit'
+
+dmhedit $dir'/tg_reprocess/hrcf05168N004_evt2.fits' 'filelist=' 'op=add' 'key=DTCOR' value=$dtcor
+

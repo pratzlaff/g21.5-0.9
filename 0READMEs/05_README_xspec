@@ -1,0 +1,11 @@
+#! /bin/bash
+
+. ~/.bash_aliases
+shopt -s expand_aliases
+
+heainit
+
+. src/functions.bash
+
+mkdir -p xspec
+xspec - src/fit.xcm

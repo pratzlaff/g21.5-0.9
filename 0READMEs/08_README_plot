@@ -1,0 +1,25 @@
+#! /bin/bash
+
+. ~/python3_venv/bin/activate
+
+outdir=./plots
+mkdir -p $outdir
+
+python3 src/g21.5_plot_fluxes.py \
+  -o $outdir/g21.5-0.9_hrc_lc.pdf
+
+#python3 src/g21.5_plot_fluxes.py -v \
+  #-o $outdir/g21.5-0.9_hrc_lc_vlk.pdf
+
+caldbs='qe_N0015_qeu_N0013'
+
+false && {
+    for caldb in $caldbs
+    do
+        outdir=./plots/$caldb
+        mkdir -p $outdir
+        python3 src/plot_fluxes.py \
+          -g './srcflux/i/*.flux' "./srcflux/$caldb/*.flux" \
+          -o $outdir/g21.5-0.9_hrc_lc.pdf
+    done
+}

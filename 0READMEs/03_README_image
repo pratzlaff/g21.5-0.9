@@ -1,0 +1,55 @@
+#! /bin/bash
+
+. ~/.bash_aliases
+shopt -s expand_aliases
+
+ciao -o
+
+. src/functions.bash
+
+mkdir -p images/hrc{s,i}/vlk
+
+for o in $(obsids)
+do
+    inst=$(instrument $o)
+
+    echo $inst | grep -qi hrc || continue
+
+    for s in vlk me
+    do
+
+        srcreg=./region/halo.reg
+
+        # 5168 has a special source region
+        [ -f "./region/${o}_halo.reg" ] && srcreg="./region/${o}_halo.reg"
+
+        echo $inst | grep -qi hrc-i && {
+            factor=16
+            outdir=./images/hrci
+            bgreg=region/bg_i.reg
+        }
+
+        echo $inst | grep -qi hrc-s && {
+            factor=16
+            outdir=./images/hrcs
+            bgreg=region/${o}_bg.reg
+        }
+
+        [ $s == vlk ] && {
+            outdir="$outdir/vlk"
+            srcreg=$(printf ./region/vlk/src_r43_%05d.reg $o)
+            bgreg=./region/vlk/g21.5_a180t250.reg
+            echo $inst | grep -qi hrc-s && \
+                bgreg=$(printf ./region/vlk/g21.5_%05d_bkg.reg $o)
+        }
+
+        [ -f "$srcreg" -a -f "$bgreg" ] || continue
+
+        ds9 \
+          data/$o/tg_reprocess/*evt2.fits \
+          -bin factor $factor -scale mode 99.5 \
+          -regions format ciao -regions "$srcreg" -regions $bgreg \
+          -saveimage $outdir/$o.jpg -exit
+    done
+
+done

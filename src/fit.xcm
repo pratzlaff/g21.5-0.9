@@ -1,0 +1,25 @@
+foreach obsid { 5166 6741 } {
+    foreach type { plerion halo } {
+        data spectra/${obsid}_${type}.pi
+        notice all
+        ignore **-0.8,8.0-**
+        statistic cstat
+        abund wilm
+        xsect vern
+        model TBabs*powerlaw
+        3.0
+        1.8
+        2e-2
+        fit 20
+        log xspec/${obsid}_${type}.log
+        show all
+        log none
+        setplot delete all
+        setplot energy
+        setplot rebin 5 1000
+        cpd xspec/${obsid}_${type}.ps/cps
+        plot ldata ratio
+        cpd /null
+    }
+}
+exit

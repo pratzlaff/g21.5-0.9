@@ -1,0 +1,10 @@
+#! /bin/bash
+
+. ~/.bash_aliases
+shopt -s expand_aliases
+
+ciao
+
+cd model
+python ../src/mkmodels.py
+cd -

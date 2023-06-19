@@ -1,0 +1,111 @@
+#! /bin/bash
+
+. /data/legs/rpete/flight/analysis_functions/caldb_files.bash
+. src/functions.bash
+
+export ASCDS_OVERRIDE=1
+[ `hostname` == 'legs' ] &&
+    . /usr/local/ciao/bin/ciao.sh ||
+    . /soft/ciao/bin/ciao.sh
+
+. /data/legs/rpete/flight/analysis_functions/tmppdir.bash
+
+iqe=11
+iqe_version=N00${iqe}
+iqe_dir=/data/legs/rpete/flight/hrci_qe/${iqe_version}/qe
+
+qeu=13
+qeu_version=N00${qeu}
+qeu_dir=/data/legs/rpete/flight/qeu/ARD/v${qeu}/qeu
+
+qe=15
+qe_version=N00${qe}
+qe_dir=/data/legs/rpete/flight/hrcs_qe/${qe_version}/qe
+
+declare -A i pars
+pars=(
+    [plerion]='tbabs.nh=3.02435;pl.phoindex=1.88391'
+    [halo]='tbabs.nh=2.4;pl.phoindex=2.1'
+)
+
+force=1
+
+for o in $(obsids)
+do
+
+    inst=$(instrument $o)
+
+    echo $inst | grep -qi hrc-i || continue
+
+    evt2=$(ls ./data/$o/tg_reprocess/*evt2.fits*)
+    asolfile=$(ls ./data/$o/primary/pcad*)
+    mskfile=$(ls ./data/$o/secondary/*msk1*)
+    bpixfile=$(ls ./data/$o/tg_reprocess/*bpix*)
+    dtffile=$(ls ./data/$o/primary/*dtf*)
+
+    echo $inst | grep -qi hrc-i && {
+
+        bkgreg=./region/vlk/g21.5_a180t250.reg
+        srcreg=$(printf ./region/vlk/src_r43_%05d.reg $o)
+        [ -f "$bkgreg" -a -f "$srcreg" ] || continue
+
+        outdir=./srcflux/vlk/i_qe_${iqe_version}
+        qe_file=$(match_caldb_file "$evt2" qe "$iqe_dir" "$iqe_version")
+        pset ardlib AXAF_HRC-I_QE_FILE="$qe_file"
+    }
+
+    echo $inst | grep -qi hrc-s && {
+
+        bkgreg=$(printf ./region/vlk/g21.5_%05d_bkg.reg $o)
+        srcreg=$(printf ./region/vlk/src_r43_%05d.reg $o)
+        [ -f "$bkgreg" -a -f "$srcreg" ] || continue
+
+        outdir=./srcflux/vlk/qe_${qe_version}_qeu_${qeu_version}
+
+        punlearn ardlib
+
+        qe_file=$(match_caldb_file "$evt2" qe "$qe_dir" "$qe_version")
+        pset ardlib AXAF_HRC-S1_QE_FILE="$qe_file"'[AXAF_QE1]'
+        pset ardlib AXAF_HRC-S2_QE_FILE="$qe_file"'[AXAF_QE2]'
+        pset ardlib AXAF_HRC-S3_QE_FILE="$qe_file"'[AXAF_QE3]'
+
+        qeu_file=$(match_caldb_file "$evt2" qeu "$qeu_dir" "$qeu_version")
+        pset ardlib AXAF_HRC-S1_QEU_FILE="$qeu_file"'[AXAF_QEU1]'
+        pset ardlib AXAF_HRC-S2_QEU_FILE="$qeu_file"'[AXAF_QEU2]'
+        pset ardlib AXAF_HRC-S3_QEU_FILE="$qeu_file"'[AXAF_QEU3]'
+    }
+
+    mkdir -p $outdir
+
+    for type in plerion #halo
+    do
+        [ $force -eq 0 -a -f $outdir/${o}_${type}_wide.flux ] && continue
+
+        pos='18:33:32.429,-10:33:58.95'
+
+        punlearn srcflux
+        python ./src/srcflux \
+          infile=./data/$o/tg_reprocess/*evt2.fits \
+          pos="$pos" \
+          outroot=$outdir/${o}_${type} \
+          band=wide \
+          srcreg=$srcreg \
+          bkgreg=$bkgreg \
+          psfmethod=ideal \
+          model="xstbabs.tbabs*xspowerlaw.pl" \
+          paramvals=${pars[$type]} \
+          abund=wilm \
+          asolfile=$asolfile \
+          mskfile=$mskfile \
+          bpixfile=$bpixfile \
+          dtffile=$dtffile \
+          clobber+
+
+        gzip -f $outdir/${o}_${type}_*.{img,expmap}
+    done
+
+    echo $inst | grep -qi hrc-s && {
+        punlearn ardlib
+    }
+
+done

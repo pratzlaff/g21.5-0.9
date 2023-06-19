@@ -1,0 +1,17 @@
+From Vinay's 2020-07-17 email:
+
+See /pool14/vlk/g21.5/ for the set of regions I used for the G21.5 analysis.
+
+For HRC-S, the background regions are named g21.5_OBSID_bkg.reg and
+the source regions are src_r43_OBSID.reg
+
+For HRC-I, there is only one background region, g21.5_a180t250.reg,
+and the source regions are src_r43_OBSID.reg
+
+Could you run them through your code and compare the count rates and
+fluxes against the values in the middle panels of the first two pages
+each of
+/data/hrc/HAT/20200528.hrcstglampifilter_g21.5drop/g21.5_hrci_rates_fluxes.pdf
+/data/hrc/HAT/20200528.hrcstglampifilter_g21.5drop/g21.5_hrcs_rates_fluxes.pdf
+I used an absorbed power-law (NH=3.02435e22, PhoIndex=1.88391) to
+convert from counts to erg/cm^2
