@@ -148,7 +148,7 @@ def main():
         #fmt_s = { 'N0014' : '^', 'N0015' : 'o' }
 
         for qe in qe_s:
-            glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N001[456]/*.flux'.format('/vlk' if args.vlk else '', qe)
+            glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N001[4567]/*.flux'.format('/vlk' if args.vlk else '', qe)
 
             fluxfiles, pifiles = get_files((glob,))
             obsids, dets, dates, srcs = get_pifiles_info(pifiles)
@@ -195,8 +195,9 @@ def main():
             ax.set_title('G21.5-0.9 Plerion')
 
         qe_i = ['N0011', 'N0012', 'N0013']
-        label_i = { 'N0011' : 'QE N0011',  'N0012' : 'QE N0012', 'N0013' : 'QE N0013' }
-        fmt_i = { 'N0011' : '^', 'N0012' : 'o', 'N0013' : 's' }
+        #qe_i = ['N0011', 'N0012', 'N0013', 'N0014']
+        label_i = { 'N0011' : 'QE N0011',  'N0012' : 'QE N0012', 'N0013' : 'QE N0013' , 'N0014' : 'QE N0014' }
+        fmt_i = { 'N0011' : '^', 'N0012' : 'o', 'N0013' : 's', 'N0014' : 'v' }
 
         #qe_i = ['N0012', 'N0013']
         #label_i = { 'N0012' : 'QE N0012', 'N0013' : 'QE N0013' }

@@ -24,13 +24,13 @@ ciao
 . /data/legs/rpete/flight/analysis_functions/tmppdir.bash
 . src/functions.bash
 
-iqe=14
+iqe=13
 iqe_version=N00${iqe}
 iqe_suffix=.20210812k
 iqe_suffix=
 iqe_dir=/data/legs/rpete/flight/hrci_qe/${iqe_version}/qe${iqe_suffix}
 
-qeu=16
+qeu=17
 qeu_version=N00${qeu}
 qeu_dir=/data/legs/rpete/flight/hrcs_qeu/ARD/v${qeu}/qeu
 
