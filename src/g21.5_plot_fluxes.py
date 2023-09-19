@@ -118,6 +118,7 @@ def main():
     parser.add_argument('-o', '--outfile', help='Output file name.')
     parser.add_argument('--isuffix', help='Brace expansion addition to I glob.')
     parser.add_argument('-v', '--vlk', action='store_true', help='Use srcflux output when run with Vinay\'s regions.')
+    parser.add_argument('-l', '--latest', action='store_true', help='Use only the latest QE.')
     parser.add_argument('--noi', help='Do not plot I fluxes.', action='store_true')
     parser.add_argument('--nos', help='Do not plot S fluxes.', action='store_true')
     args = parser.parse_args()
@@ -143,6 +144,10 @@ def main():
         label_s = { 'N0014' : 'QE N0014', 'N0015' : 'QE N0015', 'N0016' : 'QE N0016' }
         fmt_s = { 'N0014' : '^', 'N0015' : 'o', 'N0016' : 's' }
 
+        if args.latest:
+            qe_s = [qe_s[0], qe_s[-1]]
+            fmt_s = { qe_s[0]:'^c', qe_s[1]:'^c' }
+
         #qe_s = ['N0014', 'N0015']
         #label_s = { 'N0014' : 'QE N0014', 'N0015' : 'QE N0015', }
         #fmt_s = { 'N0014' : '^', 'N0015' : 'o' }
@@ -155,6 +160,8 @@ def main():
             sorti = sorted(range(len(dates)), key=lambda ix: dates[ix])
 
             fluxfiles = [fluxfiles[i] for i in sorti]
+            print(glob)
+            print(fluxfiles)
             pifiles = [pifiles[i] for i in sorti]
             obsids = [obsids[i] for i in sorti]
             dets = [dets[i] for i in sorti]
@@ -170,6 +177,10 @@ def main():
             errhi = data[det][src]['errhi']
 
             mask = x > 1998
+
+            if qe == 'N0014' and args.latest:
+                mask = x < 2010
+
             if qe > 'N0014':
                 mask = x > 2010
 
@@ -185,7 +196,8 @@ def main():
                 eb = ax.errorbar((0.5*(x[0]+x[-1]),), (mean,), (std,), fmt='', ecolor='k', capsize=12)
                 eb[-1][0].set_linestyle('--')
 
-        ax.legend(loc='upper left')
+        if not args.latest:
+            ax.legend(loc='upper left')
 
     if not args.noi:
         ax = axes
@@ -206,6 +218,10 @@ def main():
         #qe_i = ['N0011', 'N0012']
         #label_i = { 'N0011' : 'QE N0011',  'N0012' : 'QE N0012' }
         #fmt_i = { 'N0011' : '^', 'N0012' : 'o' }
+
+        if args.latest:
+            qe_i = [qe_i[0], qe_i[-1]]
+            fmt_i = { qe_i[0]:'^c', qe_i[1]:'^c' }
 
         ax.set_title('HRC-I', loc='right')
         ax.set_ylabel('Flux $(\mathregular{erg\;cm^{-2}\;s^{-1}})$')
@@ -238,7 +254,11 @@ def main():
             errhi = data[det][src]['errhi']
 
             mask = x > 1998
-            if qe == 'N0013' or qe == 'N0012':
+
+            if qe == 'N0011' and args.latest:
+                mask = x < 2016
+
+            if qe > 'N0011':
                 mask = x > 2016
 
             print(qe, x[mask], y[mask])
@@ -254,7 +274,8 @@ def main():
                 eb = ax.errorbar((0.5*(x[0]+x[-1]),), (mean,), (std,), fmt='', ecolor='k', capsize=12)
                 eb[-1][0].set_linestyle('--')
 
-        ax.legend(loc='upper left')
+        if not args.latest:
+            ax.legend(loc='upper left')
 
     plt.tight_layout()
     if (args.outfile):
