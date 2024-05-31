@@ -2,6 +2,7 @@ dir=/data/legs/rpete/flight/g21.5-0.9
 
 obsids()
 {
+    echo 28458; return
     grep '^[0-9]' "$dir"/obsids | cut -f 1 #| head -1
 }
 

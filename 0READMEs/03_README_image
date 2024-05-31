@@ -24,13 +24,11 @@ do
         [ -f "./region/${o}_halo.reg" ] && srcreg="./region/${o}_halo.reg"
 
         echo $inst | grep -qi hrc-i && {
-            factor=16
             outdir=./images/hrci
             bgreg=region/bg_i.reg
         }
 
         echo $inst | grep -qi hrc-s && {
-            factor=16
             outdir=./images/hrcs
             bgreg=region/${o}_bg.reg
         }
@@ -47,9 +45,13 @@ do
 
         ds9 \
           data/$o/tg_reprocess/*evt2.fits \
-          -bin factor $factor -scale mode 99.5 \
-          -regions format ciao -regions "$srcreg" -regions $bgreg \
-          -saveimage $outdir/$o.jpg -exit
+          -bin factor 16 \
+	  -scale mode 99.5 \
+          -regions format ciao \
+	  -regions "$srcreg" \
+	  -regions $bgreg \
+          -saveimage $outdir/$o.jpg \
+	  -exit
     done
 
 done

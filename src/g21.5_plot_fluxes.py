@@ -37,7 +37,7 @@ def get_pifiles_info(files):
         obsids.append(obsid)
         dets.append(det)
         dates.append(date)
-        srcs.append(re.findall('/\d+_(\w+)_0001', f)[0])
+        srcs.append(re.findall(r'/\d+_(\w+)_0001', f)[0])
     return obsids, dets, dates, srcs
 
 def pifile_from_fluxfile(fluxfile):
@@ -136,24 +136,26 @@ def main():
         ax = axes
         if not args.noi:
             ax = axes[0]
-        ax.set_ylabel('Flux $(\mathregular{erg\;cm^{-2}\;s^{-1}})$')
+        ax.set_ylabel(r'Flux $(\mathregular{erg\;cm^{-2}\;s^{-1}})$')
         ax.set_title('G21.5-0.9 Plerion')
         ax.set_title('HRC-S', loc='right')
 
         qe_s = ['N0014', 'N0015', 'N0016']
-        label_s = { 'N0014' : 'QE N0014', 'N0015' : 'QE N0015', 'N0016' : 'QE N0016' }
-        fmt_s = { 'N0014' : '^', 'N0015' : 'o', 'N0016' : 's' }
+        label_s = { 'N0014' : 'QE N0014',
+                    'N0015' : 'QE N0015',
+                    'N0016' : 'QE N0016',
+                   }
+        fmt_s = { 'N0014' : '^',
+                  'N0015' : 'o',
+                  'N0016' : 's',
+                 }
 
         if args.latest:
             qe_s = [qe_s[0], qe_s[-1]]
             fmt_s = { qe_s[0]:'^c', qe_s[1]:'^c' }
 
-        #qe_s = ['N0014', 'N0015']
-        #label_s = { 'N0014' : 'QE N0014', 'N0015' : 'QE N0015', }
-        #fmt_s = { 'N0014' : '^', 'N0015' : 'o' }
-
         for qe in qe_s:
-            glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N001[4567]/*.flux'.format('/vlk' if args.vlk else '', qe)
+            glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N001[45678]/*.flux'.format('/vlk' if args.vlk else '', qe)
 
             fluxfiles, pifiles = get_files((glob,))
             obsids, dets, dates, srcs = get_pifiles_info(pifiles)
@@ -206,32 +208,23 @@ def main():
         else:
             ax.set_title('G21.5-0.9 Plerion')
 
-        qe_i = ['N0011', 'N0012', 'N0013']
-        #qe_i = ['N0011', 'N0012', 'N0013', 'N0014']
-        label_i = { 'N0011' : 'QE N0011',  'N0012' : 'QE N0012', 'N0013' : 'QE N0013' , 'N0014' : 'QE N0014' }
-        fmt_i = { 'N0011' : '^', 'N0012' : 'o', 'N0013' : 's', 'N0014' : 'v' }
-
-        #qe_i = ['N0012', 'N0013']
-        #label_i = { 'N0012' : 'QE N0012', 'N0013' : 'QE N0013' }
-        #fmt_i = { 'N0012' : 'o', 'N0013' : 's' }
-
-        #qe_i = ['N0011', 'N0012']
-        #label_i = { 'N0011' : 'QE N0011',  'N0012' : 'QE N0012' }
-        #fmt_i = { 'N0011' : '^', 'N0012' : 'o' }
+        qe_i = ['N0011', 'N0012', 'N0013', 'N0014', 'N0015']
+        fmt_i = { 'N0011':'^', 'N0012':'o', 'N0013':'s', 'N0014':'v', 'N0015':'P' }
 
         if args.latest:
             qe_i = [qe_i[0], qe_i[-1]]
             fmt_i = { qe_i[0]:'^c', qe_i[1]:'^c' }
 
         ax.set_title('HRC-I', loc='right')
-        ax.set_ylabel('Flux $(\mathregular{erg\;cm^{-2}\;s^{-1}})$')
+        ax.set_ylabel(r'Flux $(\mathregular{erg\;cm^{-2}\;s^{-1}})$')
         ax.set_xlabel('Date')
 
         det, src = 'HRC-I', 'plerion'
         for qe in qe_i:
             brace = ''
-            if args.isuffix:
+            if args.isuffix and qe == 'N0015':
                 brace = '{{,{}}}'.format(args.isuffix)
+                brace = args.isuffix
             glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/i_qe_{}{}/*.flux'.format('/vlk' if args.vlk else '', qe, brace)
             print(glob)
             fluxfiles, pifiles = get_files((glob,))
@@ -261,10 +254,13 @@ def main():
             if qe > 'N0011':
                 mask = x > 2016
 
+            ilabel = f'QE {qe}'
+            if args.isuffix and qe == 'N0015':
+                ilabel += args.isuffix
             print(qe, x[mask], y[mask])
             ax.errorbar(x[mask], y[mask],
                         yerr=[errlo[mask], errhi[mask]],
-                        fmt=fmt_i[qe], label=label_i[qe])
+                        fmt=fmt_i[qe], label=ilabel)
 
             if qe == 'N0011':
                 mask = x < 2016

@@ -2,8 +2,32 @@
 
 obsids="$@"
 
+#<<'COMMENT'
+iqe_suffix="$1"
+shift
+obsids="$@"
+echo $iqe_suffix
+echo $obsids
+#COMMENT
+
 <<'COMMENT'
-obsids=$(grep '^[0-9]' ./obsids | grep -i hrc-s | head -1 | cut -f1)
+sname=g21.5
+screen -dmS $sname bash -c 'exec bash'
+obsids='28458'
+for  i in 00 01 05 10 15 20 25 30 35 def
+do
+  for o in $obsids
+  do
+    iqe_suffix=.${i}
+    rm -rf srcflux/i_qe_N0015"${iqe_suffix}/${o}_"*
+    screen -S $sname -X screen bash -c "time /bin/bash 0READMEs/07_README_srcflux $iqe_suffix $o; exec bash"
+  done
+done
+screen -rS $sname
+COMMENT
+
+<<'COMMENT'
+obsids=$(grep '^[0-9]' ./obsids | grep -i hrc-i | head -2 | cut -f1)
 . /data/legs/rpete/flight/analysis_functions/util.bash
 screen -dmS g21.5 bash -c 'exec bash'
 n=1
@@ -24,13 +48,13 @@ ciao
 . /data/legs/rpete/flight/analysis_functions/tmppdir.bash
 . src/functions.bash
 
-iqe=13
+iqe=15
 iqe_version=N00${iqe}
-iqe_suffix=.20210812k
-iqe_suffix=
+#iqe_suffix=
+#iqe_suffix=.20231024_13
 iqe_dir=/data/legs/rpete/flight/hrci_qe/${iqe_version}/qe${iqe_suffix}
 
-qeu=17
+qeu=18
 qeu_version=N00${qeu}
 qeu_dir=/data/legs/rpete/flight/hrcs_qeu/ARD/v${qeu}/qeu
 
