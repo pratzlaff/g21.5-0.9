@@ -1,4 +1,7 @@
 #! /bin/bash
+
+set -eo pipefail
+
 #
 # create spectra
 #

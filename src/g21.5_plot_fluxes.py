@@ -140,14 +140,17 @@ def main():
         ax.set_title('G21.5-0.9 Plerion')
         ax.set_title('HRC-S', loc='right')
 
-        qe_s = ['N0014', 'N0015', 'N0016']
+        qe_s = ['N0014', 'N0015', 'N0016', 'N0017']
+        qe_s = ['N0017', ]
         label_s = { 'N0014' : 'QE N0014',
                     'N0015' : 'QE N0015',
                     'N0016' : 'QE N0016',
+                    'N0017' : 'QE N0017',
                    }
         fmt_s = { 'N0014' : '^',
                   'N0015' : 'o',
                   'N0016' : 's',
+                  'N0017' : 'v',
                  }
 
         if args.latest:
@@ -155,7 +158,9 @@ def main():
             fmt_s = { qe_s[0]:'^c', qe_s[1]:'^c' }
 
         for qe in qe_s:
-            glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N001[45678]/*.flux'.format('/vlk' if args.vlk else '', qe)
+            glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N00[12][0-9]/*.flux'.format('/vlk' if args.vlk else '', qe)
+            if qe == 'N0017':
+                glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/qe_{}_qeu_N0022/*.flux'.format('/vlk' if args.vlk else '', qe)
 
             fluxfiles, pifiles = get_files((glob,))
             obsids, dets, dates, srcs = get_pifiles_info(pifiles)
@@ -180,17 +185,18 @@ def main():
 
             mask = x > 1998
 
-            if qe == 'N0014' and args.latest:
-                mask = x < 2010
+            if False:
+                if qe == 'N0014' and args.latest:
+                    mask = x < 2010
 
-            if qe > 'N0014':
-                mask = x > 2010
+                    if qe > 'N0014':
+                        mask = x > 2010
 
             ax.errorbar(x[mask], y[mask],
                         yerr=[errlo[mask], errhi[mask]],
                         fmt=fmt_s[qe], label=label_s[qe])
 
-            if qe == 'N0014':
+            if qe == 'N0017':
                 mask = x < 2010
                 mean = np.mean(y[mask])
                 std = np.std(y[mask])
@@ -208,8 +214,18 @@ def main():
         else:
             ax.set_title('G21.5-0.9 Plerion')
 
-        qe_i = ['N0011', 'N0012', 'N0013', 'N0014', 'N0015']
-        fmt_i = { 'N0011':'^', 'N0012':'o', 'N0013':'s', 'N0014':'v', 'N0015':'P' }
+        qe_i = ['N0011', 'N0012', 'N0013', 'N0014', 'N0015', 'N0016', 'N0017']
+        qe_i = ['N0015', 'N0016', 'N0017']
+        qe_i = ['N0015']
+        qe_i = ['N0011', 'N0015', 'N0016', 'N0017']
+        fmt_i = { 'N0011':'^',
+                  'N0012':'o',
+                  'N0013':'s',
+                  'N0014':'v',
+                  'N0015':'P',
+                  'N0016':'^',
+                  'N0017':'o',
+                 }
 
         if args.latest:
             qe_i = [qe_i[0], qe_i[-1]]
@@ -222,7 +238,7 @@ def main():
         det, src = 'HRC-I', 'plerion'
         for qe in qe_i:
             brace = ''
-            if args.isuffix and qe == 'N0015':
+            if args.isuffix and qe == 'N0017':
                 brace = '{{,{}}}'.format(args.isuffix)
                 brace = args.isuffix
             glob = '/data/legs/rpete/flight/g21.5-0.9/srcflux{}/i_qe_{}{}/*.flux'.format('/vlk' if args.vlk else '', qe, brace)
@@ -255,12 +271,13 @@ def main():
                 mask = x > 2016
 
             ilabel = f'QE {qe}'
-            if args.isuffix and qe == 'N0015':
+            if args.isuffix and qe == 'N0017':
                 ilabel += args.isuffix
             print(qe, x[mask], y[mask])
             ax.errorbar(x[mask], y[mask],
                         yerr=[errlo[mask], errhi[mask]],
-                        fmt=fmt_i[qe], label=ilabel)
+                        fmt=fmt_i[qe],
+                        label=ilabel)
 
             if qe == 'N0011':
                 mask = x < 2016

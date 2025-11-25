@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -eo pipefail
+
 . ~/.bash_aliases
 shopt -s expand_aliases
 

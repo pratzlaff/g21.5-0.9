@@ -1,13 +1,16 @@
 #! /bin/bash
 
+set -eo pipefail
+
 . ~/python3_venv/bin/activate
 
-false && {
+true && {
     outdir=./plots
     mkdir -p $outdir
 
     python3 src/g21.5_plot_fluxes.py \
 	    -o $outdir/g21.5-0.9_hrc_lc.pdf
+    exit
 }
 
 #python3 src/g21.5_plot_fluxes.py -v \

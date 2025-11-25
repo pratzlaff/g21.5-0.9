@@ -1,42 +1,20 @@
 #! /bin/bash
 
-obsids="$@"
+set -eo pipefail
 
-#<<'COMMENT'
+outdir_top=./srcflux
+
+iqe="$1"
+shift
 iqe_suffix="$1"
 shift
 obsids="$@"
-echo $iqe_suffix
-echo $obsids
-#COMMENT
 
 <<'COMMENT'
-sname=g21.5
-screen -dmS $sname bash -c 'exec bash'
-obsids='28458'
-for  i in 00 01 05 10 15 20 25 30 35 def
-do
-  for o in $obsids
-  do
-    iqe_suffix=.${i}
-    rm -rf srcflux/i_qe_N0015"${iqe_suffix}/${o}_"*
-    screen -S $sname -X screen bash -c "time /bin/bash 0READMEs/07_README_srcflux $iqe_suffix $o; exec bash"
-  done
-done
-screen -rS $sname
-COMMENT
-
-<<'COMMENT'
-obsids=$(grep '^[0-9]' ./obsids | grep -i hrc-i | head -2 | cut -f1)
-. /data/legs/rpete/flight/analysis_functions/util.bash
-screen -dmS g21.5 bash -c 'exec bash'
-n=1
-for ((i=1; i<=$n; i++))
-do
-  o=$(i_of_n $i $n $obsids)
-  screen -S g21.5 -X screen bash -c "time /bin/bash 0READMEs/07_README_srcflux $o; exec bash"
-done
-screen -rS g21.5
+iqe=17
+iqe_suffix=_full
+obsids='20656 21814 22803 24584 24982 25635 28458 29607'
+time parallel -j 16 /bin/bash 0READMEs/07_README_srcflux $iqe $iqe_suffix ::: $obsids
 COMMENT
 
 . ~/.bash_aliases
@@ -48,17 +26,14 @@ ciao
 . /data/legs/rpete/flight/analysis_functions/tmppdir.bash
 . src/functions.bash
 
-iqe=15
 iqe_version=N00${iqe}
-#iqe_suffix=
-#iqe_suffix=.20231024_13
 iqe_dir=/data/legs/rpete/flight/hrci_qe/${iqe_version}/qe${iqe_suffix}
 
-qeu=18
+qeu=22
 qeu_version=N00${qeu}
 qeu_dir=/data/legs/rpete/flight/hrcs_qeu/ARD/v${qeu}/qeu
 
-qe=16
+qe=17
 qe_version=N00${qe}
 qe_dir=/data/legs/rpete/flight/hrcs_qe/${qe_version}/qe
 
@@ -75,22 +50,22 @@ do
     inst=$(instrument $o)
 
     bkgreg=./region/bg_i.reg
-    echo $inst | grep -qi hrc-s && bkgreg=./region/${o}_bg.reg
+    echo $inst | \grep -qi hrc-s && bkgreg=./region/${o}_bg.reg
 
-    evt2=$(ls ./data/$o/tg_reprocess/*evt2.fits*)
-    asolfile=$(ls ./data/$o/primary/pcad*)
-    mskfile=$(ls ./data/$o/secondary/*msk1*)
-    bpixfile=$(ls ./data/$o/tg_reprocess/*bpix*)
-    dtffile=$(ls ./data/$o/primary/*dtf*)
+    evt2=$(\ls ./data/$o/tg_reprocess/*evt2.fits*)
+    asolfile=$(\ls ./data/$o/primary/pcad*)
+    mskfile=$(\ls ./data/$o/secondary/*msk1*)
+    bpixfile=$(\ls ./data/$o/tg_reprocess/*bpix*)
+    dtffile=$(\ls ./data/$o/primary/*dtf*)
 
-    echo $inst | grep -qi hrc-i && {
-        outdir=./srcflux/i_qe_${iqe_version}${iqe_suffix}
+    echo $inst | \grep -qi hrc-i && {
+        outdir="${outdir_top}"/i_qe_${iqe_version}${iqe_suffix}
         qe_file=$(match_caldb_file "$evt2" qe "$iqe_dir" "$iqe_version")
         pset ardlib AXAF_HRC-I_QE_FILE="$qe_file"
     }
 
-    echo $inst | grep -qi hrc-s && {
-        outdir=./srcflux/qe_${qe_version}_qeu_${qeu_version}
+    echo $inst | \grep -qi hrc-s && {
+        outdir="${outdir_top}"/qe_${qe_version}_qeu_${qeu_version}
 
         punlearn ardlib
 
@@ -111,7 +86,7 @@ do
     do
         [ $force -eq 0 -a -f $outdir/${o}_${type}_wide.flux ] && continue
 
-        pos='18:33:33.612 -10:34:07.69' \
+        pos='18:33:33.612 -10:34:07.69'
         srcreg=./region/$type.reg
 
 	# source position is off for obsid 5168

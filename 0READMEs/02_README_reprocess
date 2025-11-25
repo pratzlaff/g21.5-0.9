@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -eo pipefail
+
 . ~/.bash_aliases
 shopt -s expand_aliases
 
@@ -7,7 +9,7 @@ ciao
 
 . src/functions.bash
 
-tgreprocess=/data/legs/rpete/flight/dev/tg_reprocess
+tgreprocess=/data/legs/rpete/flight/analysis_functions/tg_reprocess
 
 # whether to force reprocessing if tg_reprocess outdir already exists
 force=0
