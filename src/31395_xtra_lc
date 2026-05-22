@@ -1,0 +1,17 @@
+#! /bin/bash
+
+set -eo pipefail
+
+. ~/.bash_aliases
+shopt -s expand_aliases
+
+ciao
+
+read tstart tstop <<<$(dmlist data/31395/tg_reprocess/hrcf31395N002_evt2.fits'[gti]' data,raw | grep -v '^#')
+
+timebin="$tstart:$tstop:1000"
+
+dmextract data/31395/tg_reprocess/hrcf31395N002_evt2.fits"[sky=region(region/31395_xtra_src.reg)][bin time=$timebin]" 31395_src.fits opt=ltc1 cl+
+dmextract data/31395/tg_reprocess/hrcf31395N002_evt2.fits"[sky=region(region/31395_xtra_bg.reg)][bin time=$timebin]" 31395_bg.fits opt=ltc1 cl+
+
+python3 src/31395_lc.py
