@@ -3,7 +3,7 @@
 set -eo pipefail
 
 . ~/.bash_aliases
-shopt -s expand_aliases
+shopt -s expand_aliases nocasematch
 
 ciao
 
@@ -18,7 +18,6 @@ for o in $(obsids)
 do
     [ -f data/$o/tg_reprocess/*_evt2.fits -a $force -eq 0 ] && continue
 
-    shopt -s nocasematch
     badpix=''
     [[ $(instrument $o) =~ hrc ]] && badpix='--badpix CALDB'
 

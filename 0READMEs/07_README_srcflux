@@ -14,6 +14,7 @@ obsids="$@"
 iqe=17
 iqe_suffix=_full
 obsids='20656 21814 22803 24584 24982 25635 28458 29607'
+obsids=31395
 time parallel -j 16 /bin/bash 0READMEs/07_README_srcflux $iqe $iqe_suffix ::: $obsids
 COMMENT
 

@@ -15,7 +15,7 @@ for o in $(obsids)
 do
     inst=$(instrument $o)
 
-    echo $inst | grep -qi hrc || continue
+    echo $inst | \grep -qi hrc || continue
 
     for s in vlk me
     do

@@ -18,7 +18,7 @@ cd data
 for o in $(obsids)
 do
   files=evt1,bpix,pbk,msk,flt,asol,bias,stat,mtl
-  instrument $o | grep -qi hrc && files=evt1,bpix,msk,flt,asol,dtf
+  instrument $o | grep -qi hrc && files=evt1,bpix,msk,flt,asol,dtf,mtl
   download_chandra_obsid $o $files
 done
 cd -
