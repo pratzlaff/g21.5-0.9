@@ -1,13 +1,15 @@
 #! /bin/bash
 
 set -eo pipefail
+SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+basedir="$SCRIPTDIR"/..
 
 . ~/.bash_aliases
 shopt -s expand_aliases nocasematch
 
 ciao
 
-. src/functions.bash
+. "basedir"/src/functions.bash
 
 tgreprocess=/data/legs/rpete/flight/analysis_functions/tg_reprocess
 
@@ -16,16 +18,16 @@ force=0
 
 for o in $(obsids)
 do
-    [ -f data/$o/tg_reprocess/*_evt2.fits -a $force -eq 0 ] && continue
+    [ -f "$basedir"/data/$o/tg_reprocess/*_evt2.fits -a $force -eq 0 ] && continue
 
     badpix=''
     [[ $(instrument $o) =~ hrc ]] && badpix='--badpix CALDB'
 
-    perl $tgreprocess $badpix data/$o 2>&1 | tee data/$o/tg_reprocess.log
+    perl $tgreprocess $badpix "$basedir"/data/$o 2>&1 | tee "$basedir"/data/$o/tg_reprocess.log
 
     [ $o -eq 5168 ] && {
-        /bin/bash ./src/fix_5168
+        /bin/bash "$basedir"/src/fix_5168
     }
 
-    rm -f data/$o/tg_reprocess/*_evt1{a,}.fits
+    rm -f "$basedir"/data/$o/tg_reprocess/*_evt1{a,}.fits
 done

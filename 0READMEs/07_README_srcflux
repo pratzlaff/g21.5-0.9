@@ -1,13 +1,16 @@
 #! /bin/bash
 
 set -eo pipefail
+SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-outdir_top=./srcflux
+outdir_top="$SCRIPTDIR"/../srcflux
 
-iqe="$1"
-shift
-iqe_suffix="$1"
-shift
+false && {
+  iqe="$1"
+  shift
+  iqe_suffix="$1"
+  shift
+}
 obsids="$@"
 
 <<'COMMENT'
@@ -25,7 +28,7 @@ ciao
 
 . /data/legs/rpete/flight/analysis_functions/caldb_files.bash
 . /data/legs/rpete/flight/analysis_functions/tmppdir.bash
-. src/functions.bash
+. "$SCRIPTDIR"/../src/functions.bash
 
 iqe_version=N00${iqe}
 iqe_dir=/data/legs/rpete/flight/hrci_qe/${iqe_version}/qe${iqe_suffix}
@@ -48,16 +51,19 @@ force=0
 
 for o in $obsids
 do
+    datadir="$SCRIPTDIR"/../data/"$o"
+    regdir="$SCRIPTDIR"/../region
+
     inst=$(instrument $o)
 
-    bkgreg=./region/bg_i.reg
-    echo $inst | \grep -qi hrc-s && bkgreg=./region/${o}_bg.reg
+    bkgreg="$regdir"/bg_i.reg
+    echo $inst | \grep -qi hrc-s && bkgreg="$regdir"/${o}_bg.reg
 
-    evt2=$(\ls ./data/$o/tg_reprocess/*evt2.fits*)
-    asolfile=$(\ls ./data/$o/primary/pcad*)
-    mskfile=$(\ls ./data/$o/secondary/*msk1*)
-    bpixfile=$(\ls ./data/$o/tg_reprocess/*bpix*)
-    dtffile=$(\ls ./data/$o/primary/*dtf*)
+    evt2=$(\ls "$datadir"/tg_reprocess/*evt2.fits*)
+    asolfile=$(\ls "$datadir"/primary/pcad*)
+    mskfile=$(\ls "$datadir"/secondary/*msk1*)
+    bpixfile=$(\ls "$datadir"/tg_reprocess/*bpix*)
+    dtffile=$(\ls "$datadir"/primary/*dtf*)
 
     echo $inst | \grep -qi hrc-i && {
         outdir="${outdir_top}"/i_qe_${iqe_version}${iqe_suffix}
@@ -88,16 +94,16 @@ do
         [ $force -eq 0 -a -f $outdir/${o}_${type}_wide.flux ] && continue
 
         pos='18:33:33.612 -10:34:07.69'
-        srcreg=./region/$type.reg
+        srcreg="$regdir"/$type.reg
 
 	# source position is off for obsid 5168
-        [ -f ./region/${o}_${type}.reg ] &&  {
+        [ -f "$regdir"/${o}_${type}.reg ] &&  {
             pos='18:33:32.429,-10:33:58.95'
-            srcreg=./region/${o}_${type}.reg
+            srcreg="$regdir"/${o}_${type}.reg
         }
         punlearn srcflux
         srcflux \
-          infile=./data/$o/tg_reprocess/*evt2.fits \
+          infile="$datadir"/tg_reprocess/*evt2.fits \
           pos="$pos" \
           outroot=$outdir/${o}_${type} \
           band=wide \

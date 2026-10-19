@@ -1,11 +1,13 @@
 #! /bin/bash
 
 set -eo pipefail
+SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+basedir="$SCRIPTDIR"/..
 
 . ~/python3_venv/bin/activate
 
 true && {
-    outdir=./plots
+    outdir="$basedir"/plots
     mkdir -p $outdir
 
     python3 src/g21.5_plot_fluxes.py \
@@ -13,7 +15,7 @@ true && {
     exit
 }
 
-#python3 src/g21.5_plot_fluxes.py -v \
+#python3 "$basedir"/src/g21.5_plot_fluxes.py -v \
   #-o $outdir/g21.5-0.9_hrc_lc_vlk.pdf
 
 caldbs='qe_N0015_qeu_N0013'
@@ -21,21 +23,21 @@ caldbs='qe_N0015_qeu_N0013'
 false && {
     for caldb in $caldbs
     do
-        outdir=./plots/$caldb
-        mkdir -p $outdir
+        outdir="$basdir/plots/$caldb"
+        mkdir -p "$outdir"
         python3 src/plot_fluxes.py \
-          -g './srcflux/i/*.flux' "./srcflux/$caldb/*.flux" \
-          -o $outdir/g21.5-0.9_hrc_lc.pdf
+          -g "$basedir/srcflux/i/*.flux" "$basedir/srcflux/$caldb/*.flux" \
+          -o "$outdir"/g21.5-0.9_hrc_lc.pdf
     done
 }
 
 true && {
-    outdir=./plots/i_qe_N0015
-    mkdir -p $outdir
+    outdir="$basedir"/plots/i_qe_N0015
+    mkdir -p "$outdir"
     for i in 00 01 15 10 20 25 30 35 def
     do
 	isuffix=.$i
-	python3 ./src/g21.5_plot_fluxes.py --isuffix="$isuffix" \
-	     -o $outdir/g21.5-0.9_hrc_lc${isuffix}.pdf
+	python3 "$basedir"/src/g21.5_plot_fluxes.py --isuffix="$isuffix" \
+	     -o "$outdir/g21.5-0.9_hrc_lc${isuffix}.pdf"
     done
 }

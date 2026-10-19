@@ -1,15 +1,18 @@
 #! /bin/bash
 
 set -eo pipefail
+SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+basedir="$SCRIPTDIR"/..
+regdir="$basedir"/region
 
 . ~/.bash_aliases
 shopt -s expand_aliases
 
 ciao -o
 
-. src/functions.bash
+. "$basedir"/src/functions.bash
 
-mkdir -p images/hrc{s,i}/vlk
+mkdir -p "$basedir"/images/hrc{s,i}/vlk
 
 for o in $(obsids)
 do
@@ -19,40 +22,39 @@ do
 
     for s in vlk me
     do
-
-        srcreg=./region/halo.reg
+        srcreg="$regdir"/halo.reg
 
         # 5168 has a special source region
-        [ -f "./region/${o}_halo.reg" ] && srcreg="./region/${o}_halo.reg"
+        [ -f "$regdir/${o}_halo.reg" ] && srcreg="$regdir/${o}_halo.reg"
 
         echo $inst | grep -qi hrc-i && {
-            outdir=./images/hrci
-            bgreg=region/bg_i.reg
+            outdir="$basedir"/images/hrci
+            bgreg="$regdir"/bg_i.reg
         }
 
         echo $inst | grep -qi hrc-s && {
-            outdir=./images/hrcs
-            bgreg=region/${o}_bg.reg
+            outdir="$basedir"/images/hrcs
+            bgreg="$regdir/${o}_bg.reg"
         }
 
         [ $s == vlk ] && {
             outdir="$outdir/vlk"
-            srcreg=$(printf ./region/vlk/src_r43_%05d.reg $o)
-            bgreg=./region/vlk/g21.5_a180t250.reg
+            srcreg=$(printf "$regdir"/vlk/src_r43_%05d.reg $o)
+            bgreg="$regdir"/vlk/g21.5_a180t250.reg
             echo $inst | grep -qi hrc-s && \
-                bgreg=$(printf ./region/vlk/g21.5_%05d_bkg.reg $o)
+                bgreg=$(printf "$regdir"/vlk/g21.5_%05d_bkg.reg $o)
         }
 
         [ -f "$srcreg" -a -f "$bgreg" ] || continue
 
         ds9 \
-          data/$o/tg_reprocess/*evt2.fits \
+          "$basedir"/data/$o/tg_reprocess/*evt2.fits \
           -bin factor 16 \
 	  -scale mode 99.5 \
           -regions format ciao \
 	  -regions "$srcreg" \
 	  -regions $bgreg \
-          -saveimage $outdir/$o.jpg \
+          -saveimage "$outdir/$o.jpg" \
 	  -exit
     done
 
