@@ -2,6 +2,8 @@ from pycrates import read_file
 import matplotlib.pylab as plt
 import numpy as np
 
+bgratio = 9
+
 plt.subplots(4,1,sharex=True)
 
 plt.subplot(4,1,1)
@@ -19,10 +21,10 @@ tab = read_file("31395_bg.fits")
 dt = tab.get_column("dt")
 rate = tab.get_column("count_rate")
 erate = tab.get_column("count_rate_err")
-plt.errorbar(dt.values, rate.values, yerr=erate.values, marker="o", color="red", mfc="black",mec="black", ecolor="grey")
+plt.errorbar(dt.values, rate.values/bgratio, yerr=erate.values/bgratio, marker="o", color="red", mfc="black",mec="black", ecolor="grey")
 plt.ylabel('Background')
-bg = rate.values
-bgerr = erate.values
+bg = rate.values/bgratio
+bgerr = erate.values/bgratio
 
 plt.subplot(4,1,3)
 x = dt.values

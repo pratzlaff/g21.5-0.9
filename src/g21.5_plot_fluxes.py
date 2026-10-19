@@ -206,6 +206,8 @@ def main():
 
         if not args.latest:
             ax.legend(loc='upper left')
+        if args.noi:
+            ax.set_xlabel('Date')
 
     if not args.noi:
         ax = axes

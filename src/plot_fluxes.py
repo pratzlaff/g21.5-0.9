@@ -66,7 +66,7 @@ def get_pifiles_info(files):
         obsids.append(obsid)
         dets.append(det)
         dates.append(date)
-        srcs.append(re.findall('/\d+_(\w+)_0001', f)[0])
+        srcs.append(re.findall(r'/\d+_(\w+)_0001', f)[0])
     return obsids, dets, dates, srcs
 
 def pifile_from_fluxfile(fluxfile):
